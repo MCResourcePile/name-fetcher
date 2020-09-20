@@ -17,7 +17,7 @@ def main(directory, options):
                     maps = data["data"]["maps"]
                     for map in maps:
                         for author in map["authors"]:
-                            if author["uuid"] not in uuids:
+                            if author["uuid"].replace("-", "") not in uuids:
                                 uuids.append(author["uuid"].replace("-", ""))
     count = str(len(uuids))
     print(count + " UUIDS found\n", flush=True)
