@@ -1,7 +1,21 @@
 import os, sys, json, requests
 from optparse import OptionParser
 
-def main(directory, options):
+def get_username(uuid):
+    api = "https://api.ashcon.app/mojang/v2/user/"
+    r = requests.get(api + uuid)
+    if "username" in r.json():
+        return r.json()["username"]
+
+def main(directory, options):    
+    output = {"uuids": {}}
+    
+    previous_output = os.path.relpath("uuids.json")
+    if os.path.exists(previous_output):
+        with open(previous_output, "r") as f:
+            json_data = f.read()
+        output = json.loads(json_data)
+        
     uuids = []
 
     for root, dirs, files in os.walk(directory):
@@ -22,24 +36,23 @@ def main(directory, options):
     count = str(len(uuids))
     print(count + " UUIDS found\n", flush=True)
                                 
-    api = "https://api.ashcon.app/mojang/v2/user/"
     names = dict()
-    
-    #uuids = uuids[0:5]
+    #uuids = uuids[0:8]
 
     for i, uuid in enumerate(uuids):
-        print("Fetching username for " + uuid + " (" + str(i+1) + " of " + count + ")", flush=True)
-        r = requests.get(api + uuid)
-        if "username" in r.json():
-            username = r.json()["username"]
-            names.update({uuid: username})
+        if uuid not in output["uuids"] or options.force:
+            print("Fetching username for " + uuid + " (" + str(i+1) + " of " + count + ")", flush=True)
+            username = get_username(uuid)
+            if username:
+                output["uuids"].update({uuid: username})
 
     with open("uuids.json", "w") as out:
-        json.dump(names, out, indent=4)
+        json.dump(output, out, indent=4)
     
 if __name__ == "__main__":
     usage = "usage: %prog <dir>"
     parser = OptionParser(usage = usage)
+    parser.add_option("-f", "--force", dest="force", help="force a refresh of all uuids even if they are known", default=False, action="store_true")
     (options, args) = parser.parse_args()
     
     if len(sys.argv) == 1:
