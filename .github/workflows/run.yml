@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       FORCE_REFRESH:
-        type: boolean
+        type: string
         default: false
       INPUT:
         type: string
@@ -37,12 +37,12 @@ jobs:
           pip install -r ${GITHUB_WORKSPACE}/scripts/name-fetcher/requirements.txt
       
       - name: execute py script
-        if: ${{ inputs.FORCE_REFRESH }} != true
+        if: inputs.FORCE_REFRESH != 'true'
         run: |
           python ${GITHUB_WORKSPACE}/scripts/name-fetcher/run.py ${{ inputs.INPUT }} ${{ inputs.OUTPUT }}
       
       - name: execute py script (forced refresh)
-        if: ${{ inputs.FORCE_REFRESH }} == true
+        if: inputs.FORCE_REFRESH == 'true'
         run: |
           python ${GITHUB_WORKSPACE}/scripts/name-fetcher/run.py ${{ inputs.INPUT }} ${{ inputs.OUTPUT }} --force
 
