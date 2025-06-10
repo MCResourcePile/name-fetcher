@@ -2,10 +2,12 @@ import os, sys, json, re, requests
 from optparse import OptionParser
 
 def get_username(uuid):
-    api = "https://api.ashcon.app/mojang/v2/user/"
-    r = requests.get(api + uuid)
-    if "username" in r.json():
-        return r.json()["username"]
+    endpoint = "https://playerdb.co/api/player/minecraft/" + uuid
+    headers = {"user-agent": "MCResourcePile/1.0 (name-fetcher)"}
+
+    r = requests.get(endpoint, headers=headers)
+    if r.status_code == requests.codes.ok:
+        return r.json()["data"]["player"]["username"]
 
 def main(directory, uuids_file, options):
     output = {"uuids": {}}
